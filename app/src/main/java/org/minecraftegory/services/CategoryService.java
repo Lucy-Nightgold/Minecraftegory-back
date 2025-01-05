@@ -1,5 +1,6 @@
 package org.minecraftegory.services;
 
+import org.minecraftegory.DTO.CategoryDTO;
 import org.minecraftegory.entities.Category;
 import org.minecraftegory.exceptions.CategoryNotFoundException;
 import org.minecraftegory.repositories.CategoryRepository;
@@ -72,5 +73,20 @@ public class CategoryService {
 
     public boolean isCategoryRoot(Category category) {
         return category.getParent() == null;
+    }
+
+    public CategoryDTO getDTO(Category category) {
+        CategoryDTO dto = new CategoryDTO();
+        dto.setId(category.getId());
+        dto.setCreationDate(category.getCreationDate());
+        dto.setParentId(category.getParent().getId());
+        dto.setChildrenIds(category.getChildren().stream().map(Category::getId).toList());
+        return dto;
+    }
+
+    public List<CategoryDTO> getDTOList(List<Category> categories) {
+        return categories.stream()
+                .map(this::getDTO)
+                .toList();
     }
 }
