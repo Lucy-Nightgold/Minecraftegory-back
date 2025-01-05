@@ -56,6 +56,9 @@ public class CategoryService {
     }
 
     public void deleteCategory(Category category) {
+        for (Category child : category.getChildren()) {
+            deleteCategory(child);
+        }
         categoryRepository.delete(category);
     }
 
