@@ -55,6 +55,10 @@ public class Category {
         return children;
     }
 
+    public void setChildren(List<Category> children) {
+        this.children = children;
+    }
+
     public void addChild(Category child) {
         children.add(child);
     }
