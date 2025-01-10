@@ -3,6 +3,7 @@ package org.minecraftegory.services;
 import org.minecraftegory.DTO.CategoryDTO;
 import org.minecraftegory.entities.Category;
 import org.minecraftegory.exceptions.CategoryNotFoundException;
+import org.minecraftegory.exceptions.InvalidParentException;
 import org.minecraftegory.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,10 @@ public class CategoryService {
         return category.getChildren();
     }
 
+    public List<Category> getRootCategories() {
+        return getAllCategories().stream().filter(this::isCategoryRoot).toList();
+    }
+
     public Category createCategory(String name, Category parent) {
         Category category = new Category();
         category.setName(name);
@@ -44,21 +49,41 @@ public class CategoryService {
         category.setParent(parent);
         category.setChildren(new ArrayList<>());
         categoryRepository.save(category);
+        if (parent != null) {
+            parent.addChild(category);
+            categoryRepository.save(parent);
+        }
         return category;
     }
 
-    public Category updateCategory(Category category, String name, Category parent) {
+    public Category updateCategory(int categoryId, String name, Category parent) throws CategoryNotFoundException, InvalidParentException {
+        Category category = getCategory(categoryId);
+        Category oldParent = getParentCategory(category);
+        if (isCategoryInvalid(category, parent)) {
+            throw new InvalidParentException("error - invalid new parent for category " + categoryId);
+        }
+        if (!isCategoryRoot(category)) {
+            oldParent.removeChild(category);
+            categoryRepository.save(oldParent);
+        }
+        if (parent != null && !parent.getChildren().contains(category)) {
+            parent.addChild(category);
+            categoryRepository.save(parent);
+        }
         category.setName(name);
         category.setParent(parent);
-        parent.addChild(category);
         categoryRepository.save(category);
-        categoryRepository.save(parent);
         return category;
     }
 
     public void deleteCategory(Category category) {
-        for (Category child : category.getChildren()) {
-            deleteCategory(child);
+        for (int i = 0; i < category.getChildren().size(); i++) {
+            deleteCategory(category.getChildren().get(i));
+        }
+        Category parent = category.getParent();
+        if (parent != null) {
+            parent.removeChild(category);
+            categoryRepository.save(parent);
         }
         categoryRepository.delete(category);
     }
@@ -68,7 +93,8 @@ public class CategoryService {
     }
 
     public boolean isCategoryInvalid(Category category, Category parent) {
-        return parent != null && category.getId() == parent.getId();
+        System.out.println("parent: " + (parent == null) + ": " + (parent != null ? parent.isDescendantOf(category): ""));
+        return parent != null && (category.getId() == parent.getId() || parent.isDescendantOf(category));
     }
 
     public boolean isCategoryRoot(Category category) {
@@ -78,9 +104,12 @@ public class CategoryService {
     public CategoryDTO getDTO(Category category) {
         CategoryDTO dto = new CategoryDTO();
         dto.setId(category.getId());
+        dto.setName(category.getName());
         dto.setCreationDate(category.getCreationDate());
-        dto.setParentId(category.getParent().getId());
-        dto.setChildrenIds(category.getChildren().stream().map(Category::getId).toList());
+        dto.setRoot(isCategoryRoot(category));
+        dto.setChildrenNumber(getChildrenCategories(category).size());
+        dto.setChildrenId(getChildrenCategories(category).stream().map(Category::getId).toList());
+        dto.setParentId(isCategoryRoot(category) ? 0: getParentCategory(category).getId());
         return dto;
     }
 
