@@ -1,10 +1,13 @@
 package org.minecraftegory.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
 
+@Getter
 @Entity
 @Table(name = "category")
 public class Category {
@@ -13,51 +16,19 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Setter
     private String name;
 
+    @Setter
     private Date creationDate;
 
     @ManyToOne
+    @Setter
     private Category parent;
 
     @OneToMany
+    @Setter
     private List<Category> children;
-
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public Category getParent() {
-        return parent;
-    }
-
-    public void setParent(Category parent) {
-        this.parent = parent;
-    }
-
-    public List<Category> getChildren() {
-        return children;
-    }
-
-    public void setChildren(List<Category> children) {
-        this.children = children;
-    }
 
     public void addChild(Category child) {
         children.add(child);
@@ -65,5 +36,16 @@ public class Category {
 
     public void removeChild(Category child) {
         children.remove(child);
+    }
+
+    public boolean isDescendantOf(Category category) {
+        Category ancestor = getParent() != null ? getParent() : null;
+        while (ancestor != null) {
+            if (ancestor.getId() == category.getId()) {
+                return true;
+            }
+            ancestor = ancestor.getParent();
+        }
+        return false;
     }
 }
