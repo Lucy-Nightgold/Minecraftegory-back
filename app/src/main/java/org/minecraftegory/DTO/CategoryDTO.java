@@ -12,9 +12,15 @@ public class CategoryDTO {
 
     private int id;
 
+    private String name;
+
     private Date creationDate;
 
-    private int parentId;
+    private boolean isRoot;
 
-    private List<Integer> childrenIds;
+    private int childrenNumber;
+
+    private List<Integer> childrenId;
+
+    private int parentId;
 }
