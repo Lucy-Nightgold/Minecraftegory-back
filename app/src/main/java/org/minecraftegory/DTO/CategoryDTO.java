@@ -16,9 +16,7 @@ public class CategoryDTO {
 
     private Date creationDate;
 
-    private boolean isRoot;
-
-    private int childrenNumber;
+    private boolean root;
 
     private List<Integer> childrenId;
 

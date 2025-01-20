@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/category")
 public class CategoryController {
 
@@ -35,6 +36,12 @@ public class CategoryController {
         Category category = categoryService.getCategory(id);
         Category parent = categoryService.getParentCategory(category);
         return parent == null ? null: categoryService.getDTO(parent);
+    }
+
+    @GetMapping("/parent/available/{id}")
+    public List<CategoryDTO> getAvailableParent(@PathVariable int id) throws CategoryNotFoundException {
+        Category category = categoryService.getCategory(id);
+        return categoryService.getDTOList(categoryService.getAvailableParents(category));
     }
 
     @GetMapping("/children/{id}")

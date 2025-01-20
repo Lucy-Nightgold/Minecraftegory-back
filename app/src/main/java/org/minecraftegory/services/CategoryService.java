@@ -42,6 +42,10 @@ public class CategoryService {
         return getAllCategories().stream().filter(this::isCategoryRoot).toList();
     }
 
+    public List<Category> getAvailableParents(Category category) {
+        return getAllCategories().stream().filter(parent -> !isCategoryInvalid(category, parent)).toList();
+    }
+
     public Category createCategory(String name, Category parent) {
         Category category = new Category();
         category.setName(name);
@@ -107,7 +111,6 @@ public class CategoryService {
         dto.setName(category.getName());
         dto.setCreationDate(category.getCreationDate());
         dto.setRoot(isCategoryRoot(category));
-        dto.setChildrenNumber(getChildrenCategories(category).size());
         dto.setChildrenId(getChildrenCategories(category).stream().map(Category::getId).toList());
         dto.setParentId(isCategoryRoot(category) ? 0: getParentCategory(category).getId());
         return dto;
