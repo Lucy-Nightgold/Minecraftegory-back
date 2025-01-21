@@ -1,11 +1,13 @@
 package org.minecraftegory.services;
 
 import org.minecraftegory.DTO.CategoryDTO;
+import org.minecraftegory.DTO.PaginatedDTO;
 import org.minecraftegory.entities.Category;
 import org.minecraftegory.exceptions.CategoryNotFoundException;
 import org.minecraftegory.exceptions.InvalidParentException;
 import org.minecraftegory.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,12 +32,20 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
+    public List<Category> getPaginatedCategories(int page, int categoriesPerPage) {
+        return categoryRepository.findAll(PageRequest.of(page, categoriesPerPage)).toList();
+    }
+
     public Category getParentCategory(Category category) {
         return category.getParent();
     }
 
     public List<Category> getChildrenCategories(Category category) {
         return category.getChildren();
+    }
+
+    public List<Category> getChildrenPaginatedCategories(Category category, int page, int categoriesPerPage) {
+        return categoryRepository.findCategoriesByParent(category, PageRequest.of(page, categoriesPerPage));
     }
 
     public List<Category> getRootCategories() {
@@ -93,11 +103,14 @@ public class CategoryService {
     }
 
     public List<Category> searchCategories(String term) {
-        return categoryRepository.getCategoriesByNameContaining(term);
+        return categoryRepository.findCategoriesByNameContaining(term);
+    }
+
+    public List<Category> searchPaginatedCategories(String term, int page, int categoriesPerPage) {
+        return categoryRepository.findCategoriesByNameContaining(term, PageRequest.of(page, categoriesPerPage));
     }
 
     public boolean isCategoryInvalid(Category category, Category parent) {
-        System.out.println("parent: " + (parent == null) + ": " + (parent != null ? parent.isDescendantOf(category): ""));
         return parent != null && (category.getId() == parent.getId() || parent.isDescendantOf(category));
     }
 
@@ -120,5 +133,13 @@ public class CategoryService {
         return categories.stream()
                 .map(this::getDTO)
                 .toList();
+    }
+
+    public PaginatedDTO getPaginatedDTO(int page, List<Category> categories, int totalCategoriesCount, int categoriesPerPage) {
+        PaginatedDTO dto = new PaginatedDTO();
+        dto.setPage(page);
+        dto.setMaxPage(totalCategoriesCount / categoriesPerPage);
+        dto.setCategories(getDTOList(categories));
+        return dto;
     }
 }
