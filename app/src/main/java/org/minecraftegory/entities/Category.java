@@ -27,15 +27,25 @@ public class Category {
     private Category parent;
 
     @OneToMany
-    @Setter
     private List<Category> children;
+
+    private int childrenNumber;
 
     public void addChild(Category child) {
         children.add(child);
+        this.childrenNumber = children.size();
     }
 
     public void removeChild(Category child) {
-        children.remove(child);
+        if (children.contains(child)) {
+            children.remove(child);
+            this.childrenNumber = children.size();
+        }
+    }
+
+    public void setChildren(List<Category> children) {
+        this.children = children;
+        this.childrenNumber = children.size();
     }
 
     public boolean isDescendantOf(Category category) {
