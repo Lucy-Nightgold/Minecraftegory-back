@@ -4,6 +4,7 @@ import org.minecraftegory.DTO.CategoryCommand;
 import org.minecraftegory.DTO.CategoryDTO;
 import org.minecraftegory.DTO.PaginatedDTO;
 import org.minecraftegory.entities.Category;
+import org.minecraftegory.enums.Sorting;
 import org.minecraftegory.exceptions.CategoryNotFoundException;
 import org.minecraftegory.exceptions.InvalidParentException;
 import org.minecraftegory.services.CategoryService;
@@ -29,9 +30,11 @@ public class CategoryController {
 
     @GetMapping("/page/{page}")
     public PaginatedDTO getPaginatedCategories(@PathVariable int page,
-                                               @RequestParam int categoriesPerPage) {
+                                               @RequestParam int categoriesPerPage,
+                                               @RequestParam int sortValue) {
+        Sorting sort = Sorting.getByValue(sortValue);
         return categoryService.getPaginatedDTO(page,
-                categoryService.getPaginatedCategories(page, categoriesPerPage),
+                categoryService.getPaginatedCategories(page, categoriesPerPage, sort),
                 categoryService.getAllCategories().size(), categoriesPerPage);
     }
 
@@ -54,12 +57,9 @@ public class CategoryController {
     }
 
     @GetMapping("/children/{id}")
-    public PaginatedDTO getChildrenCategories(@PathVariable int id, @RequestParam int page,
-                                              @RequestParam int categoriesPerPage) throws CategoryNotFoundException {
+    public List<CategoryDTO> getChildrenCategories(@PathVariable int id) throws CategoryNotFoundException {
         Category category = categoryService.getCategory(id);
-        return categoryService.getPaginatedDTO(page,
-                categoryService.getChildrenPaginatedCategories(category, page, categoriesPerPage),
-                categoryService.getChildrenCategories(category).size(), categoriesPerPage);
+        return categoryService.getDTOList(categoryService.getChildrenCategories(category));
     }
 
     @GetMapping("/root")
@@ -71,9 +71,11 @@ public class CategoryController {
 
     @GetMapping("/search/{term}")
     public PaginatedDTO searchCategories(@PathVariable String term, @RequestParam int page,
-                                         @RequestParam int categoriesPerPage) {
+                                         @RequestParam int categoriesPerPage,
+                                         @RequestParam int sortValue) {
+        Sorting sort = Sorting.getByValue(sortValue);
         return categoryService.getPaginatedDTO(page,
-                categoryService.searchPaginatedCategories(term, page, categoriesPerPage),
+                categoryService.searchPaginatedCategories(term, page, categoriesPerPage, sort),
                 categoryService.searchCategories(term).size(), categoriesPerPage);
     }
 
