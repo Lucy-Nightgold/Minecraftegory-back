@@ -43,13 +43,6 @@ public class CategoryController {
         return categoryService.getDTO(categoryService.getCategory(id));
     }
 
-    @GetMapping("/parent/{id}")
-    public CategoryDTO getParentCategory(@PathVariable int id) throws CategoryNotFoundException {
-        Category category = categoryService.getCategory(id);
-        Category parent = categoryService.getParentCategory(category);
-        return parent == null ? null: categoryService.getDTO(parent);
-    }
-
     @GetMapping("/parent/available/{id}")
     public List<CategoryDTO> getAvailableParent(@PathVariable int id) throws CategoryNotFoundException {
         Category category = categoryService.getCategory(id);
@@ -60,13 +53,6 @@ public class CategoryController {
     public List<CategoryDTO> getChildrenCategories(@PathVariable int id) throws CategoryNotFoundException {
         Category category = categoryService.getCategory(id);
         return categoryService.getDTOList(categoryService.getChildrenCategories(category));
-    }
-
-    @GetMapping("/root")
-    public PaginatedDTO getRootCategories(@RequestParam int page, @RequestParam int categoriesPerPage) {
-        return categoryService.getPaginatedDTO(page,
-                categoryService.getChildrenPaginatedCategories(null, page, categoriesPerPage),
-                categoryService.getRootCategories().size(), categoriesPerPage);
     }
 
     @GetMapping("/search/{term}")

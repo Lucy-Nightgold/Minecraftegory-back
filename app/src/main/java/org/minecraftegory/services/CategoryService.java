@@ -46,14 +46,6 @@ public class CategoryService {
         return category.getChildren();
     }
 
-    public List<Category> getChildrenPaginatedCategories(Category category, int page, int categoriesPerPage) {
-        return categoryRepository.findCategoriesByParent(category, PageRequest.of(page, categoriesPerPage));
-    }
-
-    public List<Category> getRootCategories() {
-        return getAllCategories().stream().filter(this::isCategoryRoot).toList();
-    }
-
     public List<Category> getAvailableParents(Category category) {
         return getAllCategories().stream().filter(parent -> !isCategoryInvalid(category, parent)).toList();
     }
