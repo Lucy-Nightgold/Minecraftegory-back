@@ -13,4 +13,6 @@ public interface CategoryRepository extends JpaRepository<Category, Integer>, Pa
     List<Category> findCategoriesByNameContaining(String name);
 
     List<Category> findCategoriesByNameContaining(String name, Pageable pageable);
+
+    List<Category> findCategoriesByParentId(int id, Pageable pageable);
 }
