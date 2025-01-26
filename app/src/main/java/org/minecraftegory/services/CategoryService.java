@@ -3,11 +3,13 @@ package org.minecraftegory.services;
 import org.minecraftegory.DTO.CategoryDTO;
 import org.minecraftegory.DTO.PaginatedDTO;
 import org.minecraftegory.entities.Category;
+import org.minecraftegory.enums.Sorting;
 import org.minecraftegory.exceptions.CategoryNotFoundException;
 import org.minecraftegory.exceptions.InvalidParentException;
 import org.minecraftegory.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,8 +34,8 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
-    public List<Category> getPaginatedCategories(int page, int categoriesPerPage) {
-        return categoryRepository.findAll(PageRequest.of(page, categoriesPerPage)).toList();
+    public List<Category> getPaginatedCategories(int page, int categoriesPerPage, Sorting sort) {
+        return categoryRepository.findAll(PageRequest.of(page, categoriesPerPage, Sort.by(sort.getName()).descending())).toList();
     }
 
     public Category getParentCategory(Category category) {
@@ -106,8 +108,8 @@ public class CategoryService {
         return categoryRepository.findCategoriesByNameContaining(term);
     }
 
-    public List<Category> searchPaginatedCategories(String term, int page, int categoriesPerPage) {
-        return categoryRepository.findCategoriesByNameContaining(term, PageRequest.of(page, categoriesPerPage));
+    public List<Category> searchPaginatedCategories(String term, int page, int categoriesPerPage, Sorting sort) {
+        return categoryRepository.findCategoriesByNameContaining(term, PageRequest.of(page, categoriesPerPage, Sort.by(sort.getName()).descending()));
     }
 
     public boolean isCategoryInvalid(Category category, Category parent) {
@@ -135,10 +137,10 @@ public class CategoryService {
                 .toList();
     }
 
-    public PaginatedDTO getPaginatedDTO(int page, List<Category> categories, int totalCategoriesCount, int categoriesPerPage) {
+    public PaginatedDTO getPaginatedDTO(int page, List<Category> categories, double totalCategoriesCount, double categoriesPerPage) {
         PaginatedDTO dto = new PaginatedDTO();
         dto.setPage(page);
-        dto.setMaxPage(totalCategoriesCount / categoriesPerPage);
+        dto.setMaxPage((int) Math.ceil(totalCategoriesCount / categoriesPerPage));
         dto.setCategories(getDTOList(categories));
         return dto;
     }
